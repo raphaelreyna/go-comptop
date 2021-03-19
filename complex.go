@@ -26,7 +26,7 @@ func (c *Complex) GetSimplex(base ...Index) *Simplex {
 		return nil
 	}
 
-	for _, smplx := range group.elements {
+	for _, smplx := range group.simplices {
 		if smplx.Equals(s) {
 			return smplx
 		}

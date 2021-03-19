@@ -122,7 +122,7 @@ func (c *Complex) NewSimplex(base ...Index) *Simplex {
 			group = c.newChainGroup(p)
 			c.chainGroups[p] = group
 		}
-		group.addElement(smplx)
+		group.addSimplex(smplx)
 
 		if newSimplex == nil {
 			newSimplex = smplx
