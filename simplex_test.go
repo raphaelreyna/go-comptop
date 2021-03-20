@@ -143,10 +143,4 @@ func TestHasFace(t *testing.T) {
 	if smplx.HasFace(face) {
 		t.Fatalf("failed negative case")
 	}
-
-	cmplx.NewSimplex(1, 2, 3)
-	cmplx.NewSimplex(11, 12, 13)
-
-	fmt.Printf("euler_char(complex) = %d\tcomplex := %+v\n", cmplx.EulerChar(), cmplx)
-	t.FailNow()
 }
