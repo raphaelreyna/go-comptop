@@ -1,5 +1,7 @@
 package comptop
 
+// NewSimplex adds a Simplex to c.
+// All lower dimensional faces of the new Simplex are computed and automatically added to c.
 func (c *Complex) NewSimplex(base ...Index) *Simplex {
 	if c.chainGroups == nil {
 		c.chainGroups = ChainGroups{}
@@ -66,6 +68,8 @@ func (c *Complex) NewSimplex(base ...Index) *Simplex {
 	return newSimplex
 }
 
+// NewSimplex adds multiple simplices to c.
+// All lower dimensional faces of each new Simplex are computed and automatically added to c.
 func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
 	if c.chainGroups == nil {
 		c.chainGroups = ChainGroups{}
@@ -84,6 +88,7 @@ func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
 		var newSimplex *Simplex
 
 		stack := []*simplex{s}
+		topLevel := true
 
 		for len(stack) > 0 {
 			n := len(stack) - 1
@@ -94,8 +99,13 @@ func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
 
 			// Skip this simplex if its already in the complex
 			if smplx := c.GetSimplex(ss.base...); smplx != nil {
+				if topLevel {
+					set[smplx] = struct{}{}
+				}
+				topLevel = false
 				continue
 			}
+			topLevel = false
 
 			// Add this simplex to the appropriate chain group
 			p := ss.dim()
@@ -135,8 +145,11 @@ func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
 	return &SimplicialSet{set: set}
 }
 
+// DataProvider is used to attach user-defined data to simplices.
 type DataProvider func(Dim, Index, Base) interface{}
 
+// NewSimplex adds a Simplex to c while using dp to attach data to each newly created Simplex.
+// All lower dimensional faces of the new Simplex are computed and automatically added to c.
 func (c *Complex) NewSimplexWithData(dp DataProvider, base ...Index) *Simplex {
 	if c.chainGroups == nil {
 		c.chainGroups = ChainGroups{}
@@ -206,6 +219,8 @@ func (c *Complex) NewSimplexWithData(dp DataProvider, base ...Index) *Simplex {
 	return newSimplex
 }
 
+// NewSimplex adds multiple simplices to c, using dp to attach data to each newly created Simplex.
+// All lower dimensional faces of each new Simplex are computed and automatically added to c.
 func (c *Complex) NewSimplicesWithData(dp DataProvider, bases ...Base) *SimplicialSet {
 	if c.chainGroups == nil {
 		c.chainGroups = ChainGroups{}

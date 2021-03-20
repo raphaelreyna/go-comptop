@@ -5,8 +5,11 @@ import (
 	"sort"
 )
 
+// Index is used to establiish a total order amongst simplices of the same dimension.
+// Index is also used to uniquely identify simplicies up to dimension.
 type Index uint
 
+// Base is a collection of indices for 0-dimensional simplices.
 type Base []Index
 
 type simplex struct {
@@ -70,6 +73,12 @@ func (s *simplex) d() []*simplex {
 	return boundary
 }
 
+// Simplex is a p-dimensional polytope which is the convex hull of its p+1 0-dimensional simplices (points/vertices).
+// Every Simplex should be part of a Complex; every Simplex in a Complex is considered to live in the same topological space.
+// Simplex is uniquely identified in its Complex by its dimension ((*Simplex).Dim) and Index ((*Simplex).Index).
+// Simplex can encapsulate user-defined data in its Data field.
+//
+// More info: https://encyclopediaofmath.org/wiki/Simplex_(abstract)
 type Simplex struct {
 	simplex
 
@@ -100,14 +109,21 @@ func (s *Simplex) String() string {
 	)
 }
 
+func (s *Simplex) Complex() *Complex {
+	return s.complex
+}
+
+// Dim returns the dimension of s, which is defined to be 1 + (# of points/0-simplices in s).
 func (s *Simplex) Dim() Dim {
 	return Dim(len(s.base)) - 1
 }
 
+// Index returns the Index of s, which uniquely identifies it in the basis of its corresponding ChainGroup.
 func (s *Simplex) Index() Index {
 	return s.index
 }
 
+// Equal returns true if s and f are equal; returns false otherwise.
 func (s *Simplex) Equals(f *Simplex) bool {
 	if s.complex != f.complex {
 		return false
@@ -116,10 +132,20 @@ func (s *Simplex) Equals(f *Simplex) bool {
 	return s.simplex.equals(&f.simplex)
 }
 
+// Sort sorts the base of s by increasing order.
 func (s *Simplex) Sort() {
 	s.simplex.sort()
 }
 
+// Base returns a copy of the base set of s.
+func (s *Simplex) Base() Base {
+	b := make(Base, len(s.base))
+	copy(b, s.base)
+
+	return b
+}
+
+// HasFace returns true if s has f as a face.
 func (s *Simplex) HasFace(f *Simplex) bool {
 	if f.Dim() != s.Dim()-1 {
 		return false
@@ -137,6 +163,7 @@ func (s *Simplex) HasFace(f *Simplex) bool {
 	return false
 }
 
+// Intersection returns the intersection of simplices s and g.
 func (s *Simplex) Intersection(g *Simplex) *Simplex {
 	sortSimplices(s, g)
 
@@ -156,8 +183,9 @@ func (s *Simplex) Intersection(g *Simplex) *Simplex {
 	return s.complex.GetSimplex(intersection...)
 }
 
+// Boundary computes the boundary of s as a Chain in a ChainGroup of the Complex of s.
 func (s *Simplex) Boundary() *Chain {
-	chain := &Chain{simplices: []*Simplex{}, dim: s.Dim() - 1}
+	chain := &Chain{chain: chain{simplices: []*Simplex{}}, dim: s.Dim() - 1}
 
 	for _, smplx := range s.d() {
 		ss := s.complex.GetSimplex(smplx.base...)
@@ -167,6 +195,7 @@ func (s *Simplex) Boundary() *Chain {
 	return chain
 }
 
+// Faces returns the set of d dimensional faces of s.
 func (s *Simplex) Faces(d Dim) *SimplicialSet {
 	if faces, exists := s.faces[d]; exists {
 		return faces

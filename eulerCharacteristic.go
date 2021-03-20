@@ -1,9 +1,17 @@
 package comptop
 
+// EulerChar returns the Euler characteristic of s.
+// This function is always equal to 1 for every Simplex.
+//
+// More info: https://en.wikipedia.org/wiki/Euler_characteristic
 func (s *Simplex) EulerChar() int {
 	return 1
 }
 
+// EulerChar returns the Euler characteristic of c.
+// For chains, this value coincides with the number of connected components in the chain.
+//
+// More info: https://en.wikipedia.org/wiki/Euler_characteristic
 func (c *Chain) EulerChar() int {
 	if c.eulerChar != nil {
 		return *c.eulerChar
@@ -53,6 +61,9 @@ func (c *Chain) EulerChar() int {
 	return m
 }
 
+// EulerChar returns the Euler characteristic of the Complex.
+//
+// More info: https://en.wikipedia.org/wiki/Euler_characteristic
 func (c *Complex) EulerChar() int {
 	if c.eulerChar != nil {
 		return *c.eulerChar
@@ -73,6 +84,9 @@ func (c *Complex) EulerChar() int {
 	return m
 }
 
+// EulerChar returns the Euler characteristic of the SimplicialSet.
+//
+// More info: https://en.wikipedia.org/wiki/Euler_characteristic
 func (ss *SimplicialSet) EulerChar() int {
 	if ss.eulerChar != nil {
 		return *ss.eulerChar

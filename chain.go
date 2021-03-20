@@ -6,38 +6,47 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-type Chain struct {
-	complex    *Complex
-	chaingroup *ChainGroup
-
+type chain struct {
 	simplices []*Simplex
-	vector    Vector
-	base      map[Index]struct{}
-	idxs      map[Index]*Simplex
-	dim       Dim
-
-	eulerChar *int
-
-	isCycle bool
-
-	sorted bool
+	sorted    bool
 }
 
-// sort.Interface interface methods
+// Len is used to satisfy the sort.Interface interface
 func (c *Chain) Len() int {
 	return len(c.simplices)
 }
 
+// Less is used to satisfy the sort.Interface interface
 func (c *Chain) Less(i, j int) bool {
 	return c.simplices[i].index < c.simplices[j].index
 }
 
+// Swap is used to satisfy the sort.Interface interface
 func (c *Chain) Swap(i, j int) {
 	c.simplices[i], c.simplices[j] = c.simplices[j], c.simplices[i]
 }
 
-func (c *Chain) Sort() {
+// Chain is an element of a ChainGroup.
+// Chains are formal sums over the p-dimensional Simplices of a Complex with coefficients in Z_2 = Z/2Z.
+// This means that adding a Chain to itself results in an empty Chain (the zero element of the ChainGroup).
+type Chain struct {
+	chain
+	complex    *Complex
+	chaingroup *ChainGroup
+
+	vector Vector
+	base   map[Index]struct{}
+	idxs   map[Index]*Simplex
+	dim    Dim
+
+	eulerChar *int
+
+	isCycle bool
+}
+
+func (c *Chain) sort() {
 	sort.Sort(c)
+	c.sorted = true
 }
 
 func (c *Chain) String() string {
@@ -53,10 +62,14 @@ func (c *Chain) String() string {
 	return s
 }
 
+// Dim is the dimension od the simplices in the chain.
+// (all simplices in a chain have the same dimension)
 func (c *Chain) Dim() Dim {
 	return c.dim
 }
 
+// Add returns the results of adding Chain c to Chain a.
+// Since Chain is an element of a boolean group, if c == a then the resulting Chain is empty.
 func (c *Chain) Add(a *Chain) *Chain {
 	if a == nil {
 		return c
@@ -80,10 +93,12 @@ func (c *Chain) Add(a *Chain) *Chain {
 	}
 
 	chain := &Chain{
+		chain: chain{
+			simplices: []*Simplex{},
+		},
 		complex:    c.complex,
 		chaingroup: c.chaingroup,
 		dim:        c.dim,
-		simplices:  []*Simplex{},
 		idxs:       map[Index]*Simplex{},
 		base:       map[Index]struct{}{},
 	}
@@ -108,13 +123,15 @@ func (c *Chain) Add(a *Chain) *Chain {
 	return chain
 }
 
+// AddSimplex is a convenience method for adding the Chain containing only the Simplex s to the Chain c.
 func (c *Chain) AddSimplex(s *Simplex) *Chain {
 	return c.Add(c.chaingroup.Singleton(s))
 }
 
+// Simplices returns a copy of the simplices that make up c.
 func (c *Chain) Simplices() []*Simplex {
 	if !c.sorted {
-		c.Sort()
+		c.sort()
 	}
 
 	simplices := make([]*Simplex, len(c.simplices))
@@ -123,6 +140,7 @@ func (c *Chain) Simplices() []*Simplex {
 	return simplices
 }
 
+// Vector returns the vector representation of c.
 func (c *Chain) Vector() Vector {
 	if c.vector != nil {
 		v := mat.DenseCopyOf(c.vector)
@@ -145,9 +163,16 @@ func (c *Chain) Vector() Vector {
 	return mat.Matrix(vv).(Vector)
 }
 
+// Boundary is a group homomorphism from a p-dimensional ChainGroup to a (p-1)-dimensional ChainGroup.
+// In particular, Boundary returns the Chain of simplices that make up the boundary/faces of c.
+// For example: If c represents an edge, then the boundary is the chain consisting of the 2 vertices that it connects; if c is a filled in triangle, the boundary is the chain of the 3 edges that make up the triangle.
 func (c *Chain) Boundary() *Chain {
 	if c.isCycle {
 		return c.chaingroup.zero
+	}
+
+	if !c.sorted {
+		c.sort()
 	}
 
 	complex := c.complex

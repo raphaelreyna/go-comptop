@@ -4,6 +4,8 @@ import "fmt"
 
 type Dim uint
 
+// Complex represents an abstract simplicial complex.
+// More info: https://en.wikipedia.org/wiki/Abstract_simplicial_complex
 type Complex struct {
 	dim Dim
 
@@ -14,6 +16,7 @@ type Complex struct {
 	strng string
 }
 
+// GetSimplex returns the Simplex consisting of 0-simplices with base indices.
 func (c *Complex) GetSimplex(base ...Index) *Simplex {
 	s := &Simplex{complex: c}
 	s.base = base
@@ -39,6 +42,7 @@ func (c *Complex) GetSimplex(base ...Index) *Simplex {
 	return nil
 }
 
+// GetSimplexByIndex returns the Simplex of dimension d with Index idx.
 func (c *Complex) GetSimplexByIndex(idx Index, d Dim) *Simplex {
 	group := c.chainGroups[d]
 	if group == nil {

@@ -6,6 +6,13 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// ChainGroup represents a group in the chain complex of a Complex.
+// The elements of a chain group are the chains in a Complex c, consisting of p-dimensional simplices in c.
+// In other words, a ChainGroup represents all possible combinations of the p-dimensional simplices of a Complex.
+// Since ChainGroup represents a group, chains witihn a ChainGroup can be added together to obtain a new Chain in the ChainGroup.
+// Every ChainGroup is a boolean group which means that the sum of Chain with itself is an empty Chain.
+//
+// More info: https://en.wikipedia.org/wiki/Chain_complex
 type ChainGroup struct {
 	complex *Complex
 
@@ -59,14 +66,17 @@ func (cg *ChainGroup) addSimplex(s *Simplex) {
 	}
 }
 
+// Dim is the dimension of the simplices that make up the ChainGroup.
 func (cg *ChainGroup) Dim() Dim {
 	return cg.dim
 }
 
+// Rank is the number of simplices that make up the ChainGroup.
 func (cg *ChainGroup) Rank() int {
 	return len(cg.simplices)
 }
 
+// Simplices returns the simplices that make up the ChainGroup.
 func (cg *ChainGroup) Simplices() []*Simplex {
 	els := []*Simplex{}
 
@@ -77,6 +87,7 @@ func (cg *ChainGroup) Simplices() []*Simplex {
 	return els
 }
 
+// Simplex returns the Simplex with index idx from the ChainGroups set of simplices.
 func (cg *ChainGroup) Simplex(idx Index) *Simplex {
 	return cg.simplices[idx]
 }
@@ -89,6 +100,7 @@ func (cg *ChainGroup) String() string {
 	)
 }
 
+// IsElement returns true if c is a Chain in the ChainGroup; returns false otherwise.
 func (cg *ChainGroup) IsElement(c *Chain) bool {
 	if c.complex != cg.complex {
 		return false
@@ -107,6 +119,7 @@ func (cg *ChainGroup) IsElement(c *Chain) bool {
 	return true
 }
 
+// Add returns the Chain which is a result of adding the Chain containing only a and the Chain containing only b.
 func (cg *ChainGroup) Add(a, b *Simplex) *Chain {
 	if a == nil && b == nil {
 		return nil
@@ -147,10 +160,12 @@ func (cg *ChainGroup) Add(a, b *Simplex) *Chain {
 	}
 
 	return &Chain{
+		chain: chain{
+			simplices: []*Simplex{a, b},
+		},
 		complex:    cg.complex,
 		chaingroup: cg,
 		dim:        cg.dim,
-		simplices:  []*Simplex{a, b},
 		idxs: map[Index]*Simplex{
 			a.index: a,
 			b.index: b,
@@ -159,6 +174,7 @@ func (cg *ChainGroup) Add(a, b *Simplex) *Chain {
 	}
 }
 
+// Singleton returns the Chain consisting of only s.
 func (cg *ChainGroup) Singleton(s *Simplex) *Chain {
 	if cg.dim != s.dim() {
 		return nil
@@ -169,10 +185,12 @@ func (cg *ChainGroup) Singleton(s *Simplex) *Chain {
 	}
 
 	chain := &Chain{
+		chain: chain{
+			simplices: []*Simplex{s},
+		},
 		complex:    cg.complex,
 		chaingroup: cg,
 		dim:        cg.dim,
-		simplices:  []*Simplex{s},
 		idxs: map[Index]*Simplex{
 			s.index: s,
 		},
@@ -186,6 +204,7 @@ func (cg *ChainGroup) Singleton(s *Simplex) *Chain {
 	return chain
 }
 
+// IsZero returns true if c is the zero element of the ChainGroup.
 func (cg *ChainGroup) IsZero(c *Chain) bool {
 	if c.dim != cg.dim {
 		return false
@@ -202,20 +221,24 @@ func (cg *ChainGroup) IsZero(c *Chain) bool {
 	return false
 }
 
+// Zero returns the zero element of the ChainGroup.
 func (cg *ChainGroup) Zero() *Chain {
 	return cg.zero
 }
 
+// ChainFromVector returns the Chain represented by v.
 func (cg *ChainGroup) ChainFromVector(v Vector) *Chain {
 	if r, _ := v.Dims(); r != cg.Rank() {
 		return nil
 	}
 
 	chain := &Chain{
+		chain: chain{
+			simplices: []*Simplex{},
+		},
 		complex:    cg.complex,
 		chaingroup: cg,
 		dim:        cg.dim,
-		simplices:  []*Simplex{},
 		idxs:       map[Index]*Simplex{},
 		base:       map[Index]struct{}{},
 	}
