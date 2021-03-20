@@ -148,6 +148,15 @@ func (c *Complex) NewSimplex(base ...Index) *Simplex {
 }
 
 func (s *Simplex) String() string {
+	if s.Data == nil {
+		return fmt.Sprintf(
+			`Simplex{"dim": %d, "index": %d, "base": %v}`,
+			s.Dim(),
+			s.index,
+			s.base,
+		)
+	}
+
 	return fmt.Sprintf(
 		`Simplex{"dim": %d, "index": %d, "base": %v, "data": %+v}`,
 		s.Dim(),
