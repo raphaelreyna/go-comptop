@@ -1,0 +1,279 @@
+package comptop
+
+func (c *Complex) NewSimplex(base ...Index) *Simplex {
+	if c.chainGroups == nil {
+		c.chainGroups = ChainGroups{}
+	}
+
+	dim := Dim(len(base)) - 1
+
+	if dim > c.dim {
+		c.dim = dim
+	}
+
+	s := &simplex{base: base}
+	var newSimplex *Simplex
+
+	stack := []*simplex{s}
+
+	for len(stack) > 0 {
+		n := len(stack) - 1
+
+		// pop next simplex from stack
+		ss := stack[n]
+		stack = stack[:n]
+
+		// Skip this simplex if its already in the complex
+		if smplx := c.GetSimplex(ss.base...); smplx != nil {
+			if smplx.Dim() == dim {
+				return smplx
+			}
+			continue
+		}
+
+		// Add this simplex to the appropriate chain group
+		p := ss.dim()
+		smplx := &Simplex{
+			simplex: *ss,
+			complex: c,
+		}
+
+		group := c.chainGroups[p]
+		if group == nil {
+			group = c.newChainGroup(p)
+			c.chainGroups[p] = group
+		}
+		group.addSimplex(smplx)
+
+		if newSimplex == nil {
+			newSimplex = smplx
+		}
+
+		if p == 0 {
+			continue
+		}
+
+		// Compute the boundary and add all its simplices to the stack
+		for _, sss := range ss.d() {
+			stack = append(stack, sss)
+		}
+	}
+
+	// cached results should be reset
+	c.eulerChar = nil
+	c.strng = ""
+
+	return newSimplex
+}
+
+func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
+	if c.chainGroups == nil {
+		c.chainGroups = ChainGroups{}
+	}
+
+	set := map[*Simplex]struct{}{}
+
+	for _, base := range bases {
+		dim := Dim(len(base)) - 1
+
+		if dim > c.dim {
+			c.dim = dim
+		}
+
+		s := &simplex{base: base}
+		var newSimplex *Simplex
+
+		stack := []*simplex{s}
+
+		for len(stack) > 0 {
+			n := len(stack) - 1
+
+			// pop next simplex from stack
+			ss := stack[n]
+			stack = stack[:n]
+
+			// Skip this simplex if its already in the complex
+			if smplx := c.GetSimplex(ss.base...); smplx != nil {
+				continue
+			}
+
+			// Add this simplex to the appropriate chain group
+			p := ss.dim()
+			smplx := &Simplex{
+				simplex: *ss,
+				complex: c,
+			}
+
+			group := c.chainGroups[p]
+			if group == nil {
+				group = c.newChainGroup(p)
+				c.chainGroups[p] = group
+			}
+			group.addSimplex(smplx)
+
+			if newSimplex == nil {
+				newSimplex = smplx
+			}
+
+			if p == 0 {
+				continue
+			}
+
+			// Compute the boundary and add all its simplices to the stack
+			for _, sss := range ss.d() {
+				stack = append(stack, sss)
+			}
+		}
+
+		set[newSimplex] = struct{}{}
+	}
+
+	// cached results should be reset
+	c.eulerChar = nil
+	c.strng = ""
+
+	return &SimplicialSet{set: set}
+}
+
+type DataProvider func(Dim, Index, Base) interface{}
+
+func (c *Complex) NewSimplexWithData(dp DataProvider, base ...Index) *Simplex {
+	if c.chainGroups == nil {
+		c.chainGroups = ChainGroups{}
+	}
+
+	dim := Dim(len(base)) - 1
+
+	if dim > c.dim {
+		c.dim = dim
+	}
+
+	s := &simplex{base: base}
+	var newSimplex *Simplex
+
+	stack := []*simplex{s}
+
+	for len(stack) > 0 {
+		n := len(stack) - 1
+
+		// pop next simplex from stack
+		ss := stack[n]
+		stack = stack[:n]
+
+		// Skip this simplex if its already in the complex
+		if smplx := c.GetSimplex(ss.base...); smplx != nil {
+			if smplx.Dim() == dim {
+				return smplx
+			}
+			continue
+		}
+
+		// Add this simplex to the appropriate chain group
+		p := ss.dim()
+		smplx := &Simplex{
+			simplex: *ss,
+			complex: c,
+		}
+
+		group := c.chainGroups[p]
+		if group == nil {
+			group = c.newChainGroup(p)
+			c.chainGroups[p] = group
+		}
+		group.addSimplex(smplx)
+
+		// Add the data provded by the DataProvider
+		smplx.Data = dp(p, smplx.index, base)
+
+		if newSimplex == nil {
+			newSimplex = smplx
+		}
+
+		if p == 0 {
+			continue
+		}
+
+		// Compute the boundary and add all its simplices to the stack
+		for _, sss := range ss.d() {
+			stack = append(stack, sss)
+		}
+	}
+
+	// cached results should be reset
+	c.eulerChar = nil
+	c.strng = ""
+
+	return newSimplex
+}
+
+func (c *Complex) NewSimplicesWithData(dp DataProvider, bases ...Base) *SimplicialSet {
+	if c.chainGroups == nil {
+		c.chainGroups = ChainGroups{}
+	}
+
+	set := map[*Simplex]struct{}{}
+
+	for _, base := range bases {
+		dim := Dim(len(base)) - 1
+
+		if dim > c.dim {
+			c.dim = dim
+		}
+
+		s := &simplex{base: base}
+		var newSimplex *Simplex
+
+		stack := []*simplex{s}
+
+		for len(stack) > 0 {
+			n := len(stack) - 1
+
+			// pop next simplex from stack
+			ss := stack[n]
+			stack = stack[:n]
+
+			// Skip this simplex if its already in the complex
+			if smplx := c.GetSimplex(ss.base...); smplx != nil {
+				continue
+			}
+
+			// Add this simplex to the appropriate chain group
+			p := ss.dim()
+			smplx := &Simplex{
+				simplex: *ss,
+				complex: c,
+			}
+
+			group := c.chainGroups[p]
+			if group == nil {
+				group = c.newChainGroup(p)
+				c.chainGroups[p] = group
+			}
+			group.addSimplex(smplx)
+
+			// Add the data provded by the DataProvider
+			smplx.Data = dp(p, smplx.index, base)
+
+			if newSimplex == nil {
+				newSimplex = smplx
+			}
+
+			if p == 0 {
+				continue
+			}
+
+			// Compute the boundary and add all its simplices to the stack
+			for _, sss := range ss.d() {
+				stack = append(stack, sss)
+			}
+		}
+
+		set[newSimplex] = struct{}{}
+	}
+
+	// cached results should be reset
+	c.eulerChar = nil
+	c.strng = ""
+
+	return &SimplicialSet{set: set}
+}
