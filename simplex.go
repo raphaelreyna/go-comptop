@@ -76,6 +76,8 @@ type Simplex struct {
 	complex *Complex
 	index   Index
 
+	faces map[Dim]*SimplicialSet
+
 	Data interface{}
 }
 
@@ -128,15 +130,19 @@ func (c *Complex) NewSimplex(base ...Index) *Simplex {
 			newSimplex = smplx
 		}
 
-		// Compute the boundary and add all its simplices to the stack
 		if p == 0 {
 			continue
 		}
 
+		// Compute the boundary and add all its simplices to the stack
 		for _, sss := range ss.d() {
 			stack = append(stack, sss)
 		}
 	}
+
+	// cached results should be reset
+	c.eulerChar = nil
+	c.strng = ""
 
 	return newSimplex
 }
@@ -153,6 +159,10 @@ func (s *Simplex) String() string {
 
 func (s *Simplex) Dim() Dim {
 	return Dim(len(s.base)) - 1
+}
+
+func (s *Simplex) Index() Index {
+	return s.index
 }
 
 func (s *Simplex) Equals(f *Simplex) bool {
@@ -212,6 +222,30 @@ func (s *Simplex) Boundary() *Chain {
 	}
 
 	return chain
+}
+
+func (s *Simplex) Faces(d Dim) *SimplicialSet {
+	if faces, exists := s.faces[d]; exists {
+		return faces
+	}
+
+	faces := []*Simplex{}
+	complex := s.complex
+	group := complex.chainGroups[d]
+
+	for _, smplx := range group.simplices {
+		if s.HasFace(smplx) {
+			faces = append(faces, smplx)
+		}
+	}
+
+	if s.faces == nil {
+		s.faces = map[Dim]*SimplicialSet{}
+	}
+
+	s.faces[d] = NewSimplicialSet(faces...)
+
+	return s.faces[d]
 }
 
 func sortsimplices(simplices ...*simplex) {

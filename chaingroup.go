@@ -207,6 +207,10 @@ func (cg *ChainGroup) Zero() *Chain {
 }
 
 func (cg *ChainGroup) ChainFromVector(v Vector) *Chain {
+	if r, _ := v.Dims(); r != cg.Rank() {
+		return nil
+	}
+
 	chain := &Chain{
 		complex:    cg.complex,
 		chaingroup: cg,

@@ -6,17 +6,6 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-type Vector mat.Matrix
-
-func NewVector(idx ...Index) Vector {
-	v := mat.NewDense(len(idx), 1, nil)
-	for i := range idx {
-		v.Set(i, 0, float64(idx[i]))
-	}
-
-	return mat.Matrix(v).(Vector)
-}
-
 type Chain struct {
 	complex    *Complex
 	chaingroup *ChainGroup
@@ -26,6 +15,8 @@ type Chain struct {
 	base      map[Index]struct{}
 	idxs      map[Index]*Simplex
 	dim       Dim
+
+	eulerChar *int
 
 	isCycle bool
 
@@ -60,6 +51,10 @@ func (c *Chain) String() string {
 	s += "}"
 
 	return s
+}
+
+func (c *Chain) Dim() Dim {
+	return c.dim
 }
 
 func (c *Chain) Add(a *Chain) *Chain {
