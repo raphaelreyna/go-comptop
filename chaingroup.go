@@ -261,6 +261,33 @@ func (cg *ChainGroup) ChainFromVector(v Vector) *Chain {
 	return chain
 }
 
+func (cg *ChainGroup) NewChainFromSimplices(s ...*Simplex) *Chain {
+	chain := &Chain{
+		chain: chain{
+			simplices: []*Simplex{},
+		},
+		complex:    cg.complex,
+		chaingroup: cg,
+		dim:        cg.dim,
+		idxs:       map[Index]*Simplex{},
+		base:       map[Index]struct{}{},
+	}
+
+	for _, smplx := range s {
+		if smplx.Dim() != chain.dim {
+			continue
+		}
+
+		chain.simplices = append(chain.simplices, smplx)
+		chain.idxs[smplx.index] = smplx
+		for _, vert := range smplx.base {
+			chain.base[vert] = struct{}{}
+		}
+	}
+
+	return chain
+}
+
 func (cg *ChainGroup) updateBoundaryMatrix() {
 	if cg.dim == 0 {
 		return

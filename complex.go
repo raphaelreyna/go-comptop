@@ -52,6 +52,16 @@ func (c *Complex) GetSimplexByIndex(idx Index, d Dim) *Simplex {
 	return group.simplices[idx]
 }
 
+func (c *Complex) GetdSimplices(d Dim) []*Simplex {
+	g := c.chainGroups[d]
+
+	return g.Simplices()
+}
+
+func (c *Complex) GetChainGroup(d Dim) *ChainGroup {
+	return c.chainGroups[d]
+}
+
 func (c *Complex) String() string {
 	if c.strng != "" {
 		return c.strng

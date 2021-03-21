@@ -135,7 +135,9 @@ func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
 			}
 		}
 
-		set[newSimplex] = struct{}{}
+		if newSimplex != nil {
+			set[newSimplex] = struct{}{}
+		}
 	}
 
 	// cached results should be reset
