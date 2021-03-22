@@ -22,3 +22,21 @@ var Torus []comptop.Base = []comptop.Base{
 	{2, 7, 9},
 	{0, 2, 7},
 }
+
+var Anulus []comptop.Base = []comptop.Base{
+	{0, 1, 2},
+	{1, 2, 3},
+	{2, 3, 4},
+	{3, 4, 5},
+	{0, 4, 5},
+	{0, 1, 5},
+}
+
+var MobiusStrip []comptop.Base = []comptop.Base{
+	{0, 1, 2},
+	{1, 2, 3},
+	{2, 3, 4},
+	{3, 4, 5},
+	{1, 4, 5},
+	{0, 1, 5},
+}
