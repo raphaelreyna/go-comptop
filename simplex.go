@@ -125,6 +125,10 @@ func (s *Simplex) Index() Index {
 
 // Equal returns true if s and f are equal; returns false otherwise.
 func (s *Simplex) Equals(f *Simplex) bool {
+	if s == nil || f == nil {
+		return false
+	}
+
 	if s.complex != f.complex {
 		return false
 	}
@@ -147,19 +151,9 @@ func (s *Simplex) Base() Base {
 
 // HasFace returns true if s has f as a face.
 func (s *Simplex) HasFace(f *Simplex) bool {
-	if f.Dim() != s.Dim()-1 {
-		return false
+	if s.Intersection(f).Equals(f) {
+		return true
 	}
-
-	boundary := s.d()
-
-	for _, smplx := range boundary {
-		ss := &Simplex{simplex: *smplx, complex: s.complex}
-		if ss.Equals(f) {
-			return true
-		}
-	}
-
 	return false
 }
 
@@ -197,6 +191,10 @@ func (s *Simplex) Boundary() *Chain {
 
 // Faces returns the set of d dimensional faces of s.
 func (s *Simplex) Faces(d Dim) *SimplicialSet {
+	if s.faces == nil {
+		s.faces = map[Dim]*SimplicialSet{}
+	}
+
 	if faces, exists := s.faces[d]; exists {
 		return faces
 	}
@@ -209,10 +207,6 @@ func (s *Simplex) Faces(d Dim) *SimplicialSet {
 		if s.HasFace(smplx) {
 			faces = append(faces, smplx)
 		}
-	}
-
-	if s.faces == nil {
-		s.faces = map[Dim]*SimplicialSet{}
 	}
 
 	s.faces[d] = NewSimplicialSet(faces...)

@@ -97,10 +97,27 @@ func (ss *SimplicialSet) EulerChar() int {
 		a int = 1
 	)
 
-	rs := ss.RankedSlices()
+	allSimplices := map[Dim]map[*Simplex]struct{}{}
+	for smplx := range ss.set {
+		if _, exists := allSimplices[smplx.Dim()]; !exists {
+			allSimplices[smplx.Dim()] = map[*Simplex]struct{}{}
+		}
+		allSimplices[smplx.Dim()][smplx] = struct{}{}
 
-	for d := Dim(0); d <= Dim(len(rs)); d++ {
-		m += a * len(rs[d])
+		for d := Dim(0); d < smplx.Dim(); d++ {
+			faces := smplx.Faces(d)
+			for face := range faces.set {
+				dd := face.Dim()
+				if _, exists := allSimplices[dd]; !exists {
+					allSimplices[dd] = map[*Simplex]struct{}{}
+				}
+				allSimplices[dd][face] = struct{}{}
+			}
+		}
+	}
+
+	for d := Dim(0); d < Dim(len(allSimplices)); d++ {
+		m += a * len(allSimplices[d])
 		a *= -1
 	}
 

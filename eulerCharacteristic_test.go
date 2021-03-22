@@ -56,3 +56,26 @@ func TestEulerChar_Complex(t *testing.T) {
 		t.Fatalf("expected Euler char of torus to be 0, got %d", x)
 	}
 }
+
+func TestEulerChar_SimplicialSet(t *testing.T) {
+	c := &Complex{}
+	b := []Base{
+		{0, 1, 4},
+		{0, 1, 2},
+		{0, 2, 3},
+		{4, 6},
+		{7, 8, 9},
+		{6, 9},
+	}
+	c.NewSimplices(b...)
+
+	ss := NewSimplicialSet(
+		c.GetSimplex(0, 1, 4),
+		c.GetSimplex(7, 8, 9),
+		c.GetSimplex(6, 9),
+	)
+
+	if x := ss.EulerChar(); x != 2 {
+		t.Fatalf("expected Euler char of %v to be 2, got %d", ss, x)
+	}
+}
