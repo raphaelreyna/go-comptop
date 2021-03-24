@@ -62,8 +62,7 @@ func (c *Complex) NewSimplex(base ...Index) *Simplex {
 	}
 
 	// cached results should be reset
-	c.eulerChar = nil
-	c.strng = ""
+	c.resetCache()
 
 	return newSimplex
 }
@@ -141,8 +140,7 @@ func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
 	}
 
 	// cached results should be reset
-	c.eulerChar = nil
-	c.strng = ""
+	c.resetCache()
 
 	return &SimplicialSet{set: set}
 }
@@ -215,8 +213,7 @@ func (c *Complex) NewSimplexWithData(dp DataProvider, base ...Index) *Simplex {
 	}
 
 	// cached results should be reset
-	c.eulerChar = nil
-	c.strng = ""
+	c.resetCache()
 
 	return newSimplex
 }
@@ -289,8 +286,7 @@ func (c *Complex) NewSimplicesWithData(dp DataProvider, bases ...Base) *Simplici
 	}
 
 	// cached results should be reset
-	c.eulerChar = nil
-	c.strng = ""
+	c.resetCache()
 
 	return &SimplicialSet{set: set}
 }

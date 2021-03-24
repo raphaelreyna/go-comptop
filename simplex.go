@@ -179,12 +179,12 @@ func (s *Simplex) Intersection(g *Simplex) *Simplex {
 
 // Boundary computes the boundary of s as a Chain in a ChainGroup of the Complex of s.
 func (s *Simplex) Boundary() *Chain {
-	chain := &Chain{chain: chain{simplices: []*Simplex{}}, dim: s.Dim() - 1}
-
-	for _, smplx := range s.d() {
-		ss := s.complex.GetSimplex(smplx.base...)
-		chain.simplices = append(chain.simplices, ss)
+	if s.Dim() == 0 {
+		return nil
 	}
+
+	chain := &Chain{chain: chain{simplices: []*Simplex{}}, dim: s.Dim() - 1}
+	chain.simplices = s.Faces(s.Dim()).Slice()
 
 	return chain
 }
@@ -212,6 +212,43 @@ func (s *Simplex) Faces(d Dim) *SimplicialSet {
 	s.faces[d] = NewSimplicialSet(faces...)
 
 	return s.faces[d]
+}
+
+func (s *Simplex) Cofaces(d Dim) *SimplicialSet {
+	if d <= s.Dim() || d > s.complex.dim {
+		return nil
+	}
+
+	cf := map[*Simplex]struct{}{}
+
+	simplices := s.complex.chaingroup(d).Simplices()
+
+	for _, smplx := range simplices {
+		if smplx.HasFace(s) {
+			cf[smplx] = struct{}{}
+		}
+	}
+
+	return &SimplicialSet{set: cf}
+}
+
+func (s *Simplex) AllCofaces() *SimplicialSet {
+	if s.Dim() == s.complex.dim {
+		return nil
+	}
+
+	cf := map[*Simplex]struct{}{}
+	for d := s.Dim() + 1; d < s.complex.dim; d++ {
+		simplices := s.complex.chaingroup(d).Simplices()
+
+		for _, smplx := range simplices {
+			if smplx.HasFace(s) {
+				cf[smplx] = struct{}{}
+			}
+		}
+	}
+
+	return &SimplicialSet{set: cf}
 }
 
 func sortsimplices(simplices ...*simplex) {

@@ -12,6 +12,7 @@ type Complex struct {
 	dim Dim
 
 	chainGroups ChainGroups
+	principles  map[*Simplex]struct{}
 
 	eulerChar *int
 
@@ -89,14 +90,38 @@ func (c *Complex) String() string {
 		return c.strng
 	}
 
-	s := fmt.Sprintf(`Complex{"dim": %d`, c.dim)
+	s := fmt.Sprintf(`Complex{"dim": %d,`, c.dim)
 	s += ` "simplices": {`
+
+	if c.principles == nil {
+		c.principles = c.PrincipleSimplices().set
+	}
+
+	for smplx := range c.principles {
+		s += smplx.String() + ", "
+	}
+
+	s += "}}"
+
+	c.strng = s
+
+	return s
+}
+
+func (c *Complex) PrincipleSimplices() *SimplicialSet {
+	if c.principles != nil {
+		return &SimplicialSet{
+			set: c.principles,
+		}
+	}
+
+	p := map[*Simplex]struct{}{}
 
 	for d := int(c.dim); d >= 0; d-- {
 		group := c.chainGroups[Dim(d)]
 		for _, smplx := range group.simplices {
 			if d == int(c.dim) {
-				s += smplx.String() + ", "
+				p[smplx] = struct{}{}
 				continue
 			}
 
@@ -109,14 +134,18 @@ func (c *Complex) String() string {
 			}
 
 			if !isFace {
-				s += smplx.String() + ", "
+				p[smplx] = struct{}{}
 			}
 		}
 	}
 
-	s += "}}"
+	c.principles = p
 
-	c.strng = s
+	return &SimplicialSet{set: p}
+}
 
-	return s
+func (c *Complex) resetCache() {
+	c.eulerChar = nil
+	c.strng = ""
+	c.principles = nil
 }
