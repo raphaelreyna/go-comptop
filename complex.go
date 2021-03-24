@@ -1,6 +1,8 @@
 package comptop
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Dim uint
 
@@ -14,6 +16,22 @@ type Complex struct {
 	eulerChar *int
 
 	strng string
+}
+
+func (c *Complex) chaingroup(d Dim) *ChainGroup {
+	if d > c.dim {
+		return nil
+	}
+
+	if c.chainGroups == nil {
+		c.chainGroups = ChainGroups{}
+	}
+
+	if c.chainGroups[d] == nil {
+		c.chainGroups[d] = c.newChainGroup(d)
+	}
+
+	return c.chainGroups[d]
 }
 
 // GetSimplex returns the Simplex consisting of 0-simplices with base indices.
@@ -53,13 +71,17 @@ func (c *Complex) GetSimplexByIndex(idx Index, d Dim) *Simplex {
 }
 
 func (c *Complex) GetdSimplices(d Dim) []*Simplex {
-	g := c.chainGroups[d]
+	if d > c.dim {
+		return nil
+	}
+
+	g := c.chaingroup(d)
 
 	return g.Simplices()
 }
 
 func (c *Complex) GetChainGroup(d Dim) *ChainGroup {
-	return c.chainGroups[d]
+	return c.chaingroup(d)
 }
 
 func (c *Complex) String() string {

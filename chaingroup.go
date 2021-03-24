@@ -80,6 +80,10 @@ func (cg *ChainGroup) Rank() int {
 func (cg *ChainGroup) Simplices() []*Simplex {
 	els := []*Simplex{}
 
+	if cg.simplices == nil {
+		cg.simplices = map[Index]*Simplex{}
+	}
+
 	for _, s := range cg.simplices {
 		els = append(els, s)
 	}

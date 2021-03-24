@@ -75,7 +75,7 @@ func (c *Complex) EulerChar() int {
 	)
 
 	for d := Dim(0); d <= c.dim; d++ {
-		m += a * len(c.chainGroups[d].simplices)
+		m += a * len(c.chaingroup(d).simplices)
 		a *= -1
 	}
 
