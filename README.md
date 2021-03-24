@@ -1,6 +1,6 @@
 <img src="https://github.com/raphaelreyna/go-comptop/raw/master/logo/logo.png" height="256px">
 
-# go-comptop [![](https://godoc.org/github.com/raphaelreyna/go-comptop?status.svg)](http://godoc.org/github.com/raphaelreyna/go-recon)
+# go-comptop [![](https://godoc.org/github.com/raphaelreyna/go-comptop?status.svg)](http://godoc.org/github.com/raphaelreyna/go-comptop)
 
 A computational topology package for gophers.
 
