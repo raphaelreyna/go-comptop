@@ -58,11 +58,11 @@ func (cg *ChainGroup) addSimplex(s *Simplex) {
 		cg.basespace[v] = struct{}{}
 	}
 
-	cg.updateBoundaryMatrix()
+	cg.boundaryMatrix = nil
 
 	higherGroup := cg.complex.chainGroups[cg.dim+1]
 	if higherGroup != nil {
-		higherGroup.updateBoundaryMatrix()
+		higherGroup.boundaryMatrix = nil
 	}
 }
 
@@ -290,6 +290,20 @@ func (cg *ChainGroup) NewChainFromSimplices(s ...*Simplex) *Chain {
 	}
 
 	return chain
+}
+
+func (cg *ChainGroup) BoundaryMatrix() mat.Matrix {
+	if cg.dim == 0 {
+		return nil
+	}
+
+	if cg.boundaryMatrix != nil {
+		return cg.boundaryMatrix
+	}
+
+	cg.updateBoundaryMatrix()
+
+	return cg.boundaryMatrix
 }
 
 func (cg *ChainGroup) updateBoundaryMatrix() {

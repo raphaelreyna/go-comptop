@@ -183,7 +183,7 @@ func (c *Chain) Boundary() *Chain {
 		lowerGroup = complex.chainGroups[group.dim-1]
 	}
 
-	bm := group.boundaryMatrix
+	bm := group.BoundaryMatrix()
 	v := c.Vector().(mat.Matrix)
 
 	bmm, _ := bm.Dims()
