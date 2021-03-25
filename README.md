@@ -57,12 +57,12 @@ import (
 )
 
 func main() {
-  c := &comptop.Complex{}
+	c := &comptop.Complex{}
   
 	loggingNetwork := []comptop.Base{
 		{0, 1, 2},
 		{5, 6, 7},
-    {5, 9},
+		{5, 9},
 	}
 	c.NewSimplices(loggingNetwork...)
 
