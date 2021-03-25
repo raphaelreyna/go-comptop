@@ -81,3 +81,5 @@ func main() {
 ```
 
 We correctly get 3 as the answer.
+
+(See work by Y. Baryshnikov and R.Ghrist 'Target Enumeration via Euler Characteristic Integrals' for more info / theory)
