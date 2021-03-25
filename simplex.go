@@ -109,6 +109,7 @@ func (s *Simplex) String() string {
 	)
 }
 
+// Complex returns the Complex that s belongs to.
 func (s *Simplex) Complex() *Complex {
 	return s.complex
 }
@@ -214,6 +215,7 @@ func (s *Simplex) Faces(d Dim) *SimplicialSet {
 	return s.faces[d]
 }
 
+// Cofaces returns the set of simplices of dimension d that have s as a face.
 func (s *Simplex) Cofaces(d Dim) *SimplicialSet {
 	if d <= s.Dim() || d > s.complex.dim {
 		return nil
@@ -232,6 +234,7 @@ func (s *Simplex) Cofaces(d Dim) *SimplicialSet {
 	return &SimplicialSet{set: cf}
 }
 
+// AllCofaces returns the set of simplices of any dimension that have s as a face.
 func (s *Simplex) AllCofaces() *SimplicialSet {
 	if s.Dim() == s.complex.dim {
 		return nil
