@@ -29,6 +29,8 @@ func (c *Chain) Swap(i, j int) {
 // Chain is an element of a ChainGroup.
 // Chains are formal sums over the p-dimensional Simplices of a Complex with coefficients in Z_2 = Z/2Z.
 // This means that adding a Chain to itself results in an empty Chain (the zero element of the ChainGroup).
+//
+// More info: https://en.wikipedia.org/wiki/Simplicial_homology#Chains
 type Chain struct {
 	chain
 	complex    *Complex
@@ -141,6 +143,8 @@ func (c *Chain) Simplices() []*Simplex {
 }
 
 // Vector returns the vector representation of c.
+// A Chain c is represented as a Vector v by assigning v_i = 1 if
+// c contains the i^th simplex in the basis of the ChainGroup; v_i = 0 otherwise.
 func (c *Chain) Vector() Vector {
 	if c.vector != nil {
 		v := mat.DenseCopyOf(c.vector)
@@ -166,6 +170,8 @@ func (c *Chain) Vector() Vector {
 // Boundary is a group homomorphism from a p-dimensional ChainGroup to a (p-1)-dimensional ChainGroup.
 // In particular, Boundary returns the Chain of simplices that make up the boundary/faces of c.
 // For example: If c represents an edge, then the boundary is the chain consisting of the 2 vertices that it connects; if c is a filled in triangle, the boundary is the chain of the 3 edges that make up the triangle.
+//
+// More info: https://en.wikipedia.org/wiki/Simplicial_homology#Boundaries_and_cycles
 func (c *Chain) Boundary() *Chain {
 	if c.isCycle {
 		return c.chaingroup.zero

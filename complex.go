@@ -81,6 +81,9 @@ func (c *Complex) GetdSimplices(d Dim) []*Simplex {
 	return g.Simplices()
 }
 
+// ChainGroup returns the free abelian group of d-chains in the Complex.
+//
+// More info: https://en.wikipedia.org/wiki/Free_abelian_group
 func (c *Complex) GetChainGroup(d Dim) *ChainGroup {
 	return c.chaingroup(d)
 }
@@ -108,6 +111,8 @@ func (c *Complex) String() string {
 	return s
 }
 
+// PrincipleSimplices returns the set of principle simplices in the Complex.
+// A Simplex is principle if it's not the face of any other Simplex (has no cofaces).
 func (c *Complex) PrincipleSimplices() *SimplicialSet {
 	if c.principles != nil {
 		return &SimplicialSet{
