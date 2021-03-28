@@ -5,13 +5,6 @@ import (
 	"sort"
 )
 
-// Index is used to establiish a total order amongst simplices of the same dimension.
-// Index is also used to uniquely identify simplicies up to dimension.
-type Index uint
-
-// Base is a collection of indices for 0-dimensional simplices.
-type Base []Index
-
 type simplex struct {
 	base   Base
 	sorted bool
@@ -137,11 +130,6 @@ func (s *Simplex) Equals(f *Simplex) bool {
 	return s.simplex.equals(&f.simplex)
 }
 
-// Sort sorts the base of s by increasing order.
-func (s *Simplex) Sort() {
-	s.simplex.sort()
-}
-
 // Base returns a copy of the base set of s.
 func (s *Simplex) Base() Base {
 	b := make(Base, len(s.base))
@@ -180,18 +168,25 @@ func (s *Simplex) Intersection(g *Simplex) *Simplex {
 
 // Boundary computes the boundary of s as a Chain in a ChainGroup of the Complex of s.
 func (s *Simplex) Boundary() *Chain {
-	if s.Dim() == 0 {
+	dim := s.dim()
+	if dim == 0 {
 		return nil
 	}
 
-	chain := &Chain{chain: chain{simplices: []*Simplex{}}, dim: s.Dim() - 1}
-	chain.simplices = s.Faces(s.Dim()).Slice()
+	chain := &Chain{chain: chain{simplices: []*Simplex{}}, dim: dim - 1}
+	chain.complex = s.complex
+	chain.chaingroup = s.complex.GetChainGroup(chain.dim)
+	chain.simplices = s.Faces(dim - 1).Slice()
 
 	return chain
 }
 
 // Faces returns the set of d dimensional faces of s.
 func (s *Simplex) Faces(d Dim) *SimplicialSet {
+	if s.dim() <= d {
+		return nil
+	}
+
 	if s.faces == nil {
 		s.faces = map[Dim]*SimplicialSet{}
 	}
@@ -241,7 +236,7 @@ func (s *Simplex) AllCofaces() *SimplicialSet {
 	}
 
 	cf := map[*Simplex]struct{}{}
-	for d := s.Dim() + 1; d < s.complex.dim; d++ {
+	for d := s.Dim() + 1; d <= s.complex.dim; d++ {
 		simplices := s.complex.chaingroup(d).Simplices()
 
 		for _, smplx := range simplices {
@@ -262,6 +257,6 @@ func sortsimplices(simplices ...*simplex) {
 
 func sortSimplices(simplices ...*Simplex) {
 	for _, s := range simplices {
-		s.Sort()
+		s.sort()
 	}
 }

@@ -114,7 +114,7 @@ func TestNewSimplex(t *testing.T) {
 	}
 }
 
-func TestIntersection(t *testing.T) {
+func TestSimplex_Intersection(t *testing.T) {
 	cmplx := &Complex{}
 
 	smplx := cmplx.NewSimplex(0, 1, 2)
@@ -129,11 +129,11 @@ func TestIntersection(t *testing.T) {
 	}
 }
 
-func TestHasFace(t *testing.T) {
+func TestSimplex_HasFace(t *testing.T) {
 	cmplx := &Complex{}
 
 	smplx := cmplx.NewSimplex(0, 1, 2)
-	face := cmplx.NewSimplex(1, 2)
+	face := cmplx.GetSimplex(1, 2)
 
 	if !smplx.HasFace(face) {
 		t.Fatalf("failed positive case")
@@ -142,5 +142,51 @@ func TestHasFace(t *testing.T) {
 	face = cmplx.NewSimplex(3, 6)
 	if smplx.HasFace(face) {
 		t.Fatalf("failed negative case")
+	}
+}
+
+func TestSimplex_Cofaces(t *testing.T) {
+	cmplx := &Complex{}
+
+	cmplx.NewSimplices([]Base{
+		{0, 1, 2}, {0, 1, 3}, {0, 1, 5}, {1, 2, 5},
+		{0, 1, 10, 11},
+	}...)
+
+	smplx := cmplx.GetSimplex(0, 1)
+
+	if smplx.Cofaces(1) != nil {
+		t.Error("expected no cofaces")
+	}
+
+	cf := smplx.Cofaces(2)
+	if count := cf.Card(); count != 5 {
+		t.Errorf("expected 3 cofaces, got %d", count)
+	}
+
+	cf = smplx.Cofaces(3)
+	if count := cf.Card(); count != 1 {
+		t.Errorf("expected 1 coface, got %d", count)
+	}
+
+	cf = smplx.AllCofaces()
+	if count := cf.Card(); count != 6 {
+		t.Errorf("expected 6 cofaces, got %d", count)
+	}
+}
+
+func TestSimplex_Boundary(t *testing.T) {
+	cmplx := &Complex{}
+
+	smplx := cmplx.NewSimplex(1, 2, 3)
+
+	bndry := smplx.Boundary()
+
+	if count := len(bndry.Simplices()); count != 3 {
+		t.Errorf("expected 3 faces in boundary, got %d", count)
+	}
+
+	if bb := bndry.Boundary(); !bb.IsZero() {
+		t.Error("failed the fundamental lemma of homology")
 	}
 }

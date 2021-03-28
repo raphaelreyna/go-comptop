@@ -1,3 +1,5 @@
+// The methods in this file satisfy the sort.Interface interface.
+// Sorting a simplex sorts its base of indices.
 package comptop
 
 func (s *simplex) Len() int {

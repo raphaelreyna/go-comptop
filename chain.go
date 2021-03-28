@@ -70,6 +70,14 @@ func (c *Chain) Dim() Dim {
 	return c.dim
 }
 
+func (c *Chain) ChainGroup() *ChainGroup {
+	return c.ChainGroup()
+}
+
+func (c *Chain) IsZero() bool {
+	return len(c.simplices) == 0
+}
+
 // Add returns the results of adding Chain c to Chain a.
 // Since Chain is an element of a boolean group, if c == a then the resulting Chain is empty.
 func (c *Chain) Add(a *Chain) *Chain {
@@ -173,6 +181,10 @@ func (c *Chain) Vector() Vector {
 //
 // More info: https://en.wikipedia.org/wiki/Simplicial_homology#Boundaries_and_cycles
 func (c *Chain) Boundary() *Chain {
+	if c.dim == 0 {
+		return nil
+	}
+
 	if c.isCycle {
 		return c.chaingroup.zero
 	}
@@ -183,11 +195,7 @@ func (c *Chain) Boundary() *Chain {
 
 	complex := c.complex
 	group := c.chaingroup
-	lowerGroup := complex.chainGroups[group.dim-1]
-	if lowerGroup == nil {
-		complex.chainGroups[group.dim-1] = complex.newChainGroup(group.dim - 1)
-		lowerGroup = complex.chainGroups[group.dim-1]
-	}
+	lowerGroup := complex.GetChainGroup(group.dim - 1)
 
 	bm := group.BoundaryMatrix()
 	v := c.Vector().(mat.Matrix)

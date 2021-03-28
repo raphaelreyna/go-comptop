@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-type Dim uint
-
 // Complex represents an abstract simplicial complex.
 // More info: https://en.wikipedia.org/wiki/Abstract_simplicial_complex
 type Complex struct {
