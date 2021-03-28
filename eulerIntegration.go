@@ -85,10 +85,10 @@ func (c *Complex) LowerExcursionSet(f CF, s int) *Complex {
 // For better stability, this method uses upper excursion sets rather than level sets.
 //
 // We compute the Euler integral as:
-//    /-\		      _b_                  _b_
-//    |				  \                    \
+//    /-\             _b_                  _b_
+//    |	              \                    \
 //    | f(x) d'\/  =  /__ s * '\/({f=s}) = /__ '\/({f>s})
-//	  |		   /\,	  s=a      /\,         s=a  /\,
+//    |        /\,    s=a      /\,         s=a  /\,
 //  \-/ c
 //
 // where {f=s} is a level set and {f>s} is an upper excursion set.

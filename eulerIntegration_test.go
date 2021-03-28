@@ -33,7 +33,7 @@ import "testing"
 //    /-\
 //    |
 //    | h(x) d\/ = 4
-//	  |		  /\
+//    |	      /\
 //  \-/
 //
 func TestEulerIntegral(t *testing.T) {
