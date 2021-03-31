@@ -197,7 +197,7 @@ func (c *Chain) Boundary() *Chain {
 	group := c.chaingroup
 	lowerGroup := complex.GetChainGroup(group.dim - 1)
 
-	bm := group.BoundaryMatrix()
+	bm := group.BoundaryMap().BoundaryMatrix()
 	v := c.Vector().(mat.Matrix)
 
 	bmm, _ := bm.Dims()

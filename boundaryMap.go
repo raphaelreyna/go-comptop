@@ -5,13 +5,19 @@ import (
 )
 
 type BoundaryMap struct {
-	p Dim
-
 	mat mat.Matrix
 
 	sn *mat.Dense
 	u  *mat.Dense
 	v  *mat.Dense
+
+	dl  int
+	zp  int
+	bpl int
+}
+
+func (bm *BoundaryMap) BoundaryMatrix() mat.Matrix {
+	return bm.mat
 }
 
 func (bm *BoundaryMap) reduce() {
@@ -33,6 +39,22 @@ func (bm *BoundaryMap) reduce() {
 	}
 
 	_reduce(0, bm.sn, bm.u, bm.v)
+
+	for row := 0; row < m; row++ {
+		for col := 0; col < m; col++ {
+			bm.u.Set(row, col,
+				float64(int(bm.u.At(row, col))%2),
+			)
+		}
+	}
+
+	for row := 0; row < n; row++ {
+		for col := 0; col < n; col++ {
+			bm.v.Set(row, col,
+				float64(int(bm.v.At(row, col))%2),
+			)
+		}
+	}
 }
 
 func _reduce(x int, n, u, v *mat.Dense) {
@@ -49,13 +71,13 @@ outer:
 					uu.Set(i, i, 1.0)
 				}
 				_swapRows(rIdx, x, n, uu)
-				u.Mul(u, uu)
+				u.Mul(uu, u)
 				vv := mat.NewDense(vDim, vDim, nil)
 				for i := 0; i < vDim; i++ {
 					vv.Set(i, i, 1.0)
 				}
 				_swapCols(cIdx, x, n, vv)
-				v.Mul(vv, v)
+				v.Mul(v, vv)
 
 				doWork = true
 
@@ -147,4 +169,66 @@ func _addCols(k, l int, a, v *mat.Dense) {
 	v.Set(k, l, 1.0)
 	v.Set(k, k, 1.0)
 	v.Set(l, l, 1.0)
+}
+
+func (bm *BoundaryMap) SmithNormal() mat.Matrix {
+	if bm.sn != nil {
+		return bm.sn
+	}
+
+	bm.reduce()
+
+	return bm.sn
+}
+
+func (bm *BoundaryMap) SmithNormalDiagonalLength() int {
+	if bm.dl >= 0 {
+		return bm.dl
+	}
+
+	if bm.sn == nil {
+		bm.reduce()
+	}
+
+	_, n := bm.v.Dims()
+	col := 0
+	for ; col < n; col++ {
+		empty := true
+		for _, el := range mat.Col(nil, col, bm.v) {
+			if el != 0 {
+				empty = false
+				break
+			}
+		}
+
+		if empty {
+			break
+		}
+	}
+
+	bm.dl = col
+
+	return col
+}
+
+func (bm *BoundaryMap) Zp() int {
+	if bm.zp >= 0 {
+		return bm.zp
+	}
+
+	_, n := bm.SmithNormal().Dims()
+
+	bm.zp = n - bm.SmithNormalDiagonalLength() - 1
+
+	return bm.zp
+}
+
+func (bm *BoundaryMap) BpLow() int {
+	if bm.bpl >= 0 {
+		return bm.zp
+	}
+
+	bm.bpl = bm.SmithNormalDiagonalLength()
+
+	return bm.zp
 }

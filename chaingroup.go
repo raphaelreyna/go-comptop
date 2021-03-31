@@ -24,7 +24,7 @@ type ChainGroup struct {
 
 	head Index
 
-	boundaryMatrix mat.Matrix
+	bm *BoundaryMap
 }
 
 func (c *Complex) newChainGroup(dim Dim) *ChainGroup {
@@ -58,11 +58,11 @@ func (cg *ChainGroup) addSimplex(s *Simplex) {
 		cg.basespace[v] = struct{}{}
 	}
 
-	cg.boundaryMatrix = nil
+	cg.bm = nil
 
 	higherGroup := cg.complex.chainGroups[cg.dim+1]
 	if higherGroup != nil {
-		higherGroup.boundaryMatrix = nil
+		higherGroup.bm = nil
 	}
 }
 
@@ -292,21 +292,21 @@ func (cg *ChainGroup) NewChainFromSimplices(s ...*Simplex) *Chain {
 	return chain
 }
 
-func (cg *ChainGroup) BoundaryMatrix() mat.Matrix {
+func (cg *ChainGroup) BoundaryMap() *BoundaryMap {
 	if cg.dim == 0 {
 		return nil
 	}
 
-	if cg.boundaryMatrix != nil {
-		return cg.boundaryMatrix
+	if cg.bm != nil {
+		return cg.bm
 	}
 
-	cg.updateBoundaryMatrix()
+	cg.updateBoundaryMap()
 
-	return cg.boundaryMatrix
+	return cg.bm
 }
 
-func (cg *ChainGroup) updateBoundaryMatrix() {
+func (cg *ChainGroup) updateBoundaryMap() {
 	if cg.dim == 0 {
 		return
 	}
@@ -341,7 +341,9 @@ func (cg *ChainGroup) updateBoundaryMatrix() {
 		}
 	}
 
-	cg.boundaryMatrix = bm
+	cg.bm = &BoundaryMap{
+		mat: bm,
+	}
 }
 
 type ChainGroups map[Dim]*ChainGroup
