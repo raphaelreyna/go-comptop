@@ -22,3 +22,24 @@ func TestComplex_PrincipleSimplices(t *testing.T) {
 		}
 	}
 }
+
+func TestComplex_BettiNumbers(t *testing.T) {
+	c := &Complex{}
+	c.NewSimplices([]Base{
+		{0, 1}, {0, 2}, {1, 3}, {2, 3}, {0, 1, 2},
+	}...)
+
+	expectedBN := []int{0, 1, 0}
+
+	bn := c.BettiNumbers()
+
+	if len(expectedBN) != len(bn) {
+		t.Fatalf("invalid number of Betti numbers")
+	}
+
+	for idx, ebn := range expectedBN {
+		if bn[idx] != ebn {
+			t.Fatalf("Betti number %d is wrong; expected %d received %d", idx, ebn, bn[idx])
+		}
+	}
+}

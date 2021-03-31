@@ -147,6 +147,24 @@ func (c *Complex) PrincipleSimplices() *SimplicialSet {
 	return &SimplicialSet{set: p}
 }
 
+func (c *Complex) BettiNumbers() []int {
+	var (
+		z     int
+		betti = []int{}
+	)
+
+	for dim := Dim(0); dim <= c.dim; dim++ {
+		g := c.GetChainGroup(dim)
+		if z != 0 {
+			betti = append(betti, z-g.BoundaryMap().SmithNormalDiagonalLength())
+		}
+		bm := c.GetChainGroup(dim).BoundaryMap()
+		z = bm.Zp()
+	}
+
+	return append(betti, z)
+}
+
 func (c *Complex) resetCache() {
 	c.eulerChar = nil
 	c.strng = ""

@@ -293,10 +293,6 @@ func (cg *ChainGroup) NewChainFromSimplices(s ...*Simplex) *Chain {
 }
 
 func (cg *ChainGroup) BoundaryMap() *BoundaryMap {
-	if cg.dim == 0 {
-		return nil
-	}
-
 	if cg.bm != nil {
 		return cg.bm
 	}
@@ -308,6 +304,15 @@ func (cg *ChainGroup) BoundaryMap() *BoundaryMap {
 
 func (cg *ChainGroup) updateBoundaryMap() {
 	if cg.dim == 0 {
+		data := []float64{}
+		for i := 0; i < cg.Rank(); i++ {
+			data = append(data, 1)
+		}
+
+		cg.bm = &BoundaryMap{
+			mat: mat.NewDense(1, cg.Rank(), data),
+		}
+
 		return
 	}
 

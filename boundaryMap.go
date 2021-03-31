@@ -11,9 +11,9 @@ type BoundaryMap struct {
 	u  *mat.Dense
 	v  *mat.Dense
 
-	dl  int
-	zp  int
-	bpl int
+	dl  *int
+	zp  *int
+	bpl *int
 }
 
 func (bm *BoundaryMap) BoundaryMatrix() mat.Matrix {
@@ -182,8 +182,8 @@ func (bm *BoundaryMap) SmithNormal() mat.Matrix {
 }
 
 func (bm *BoundaryMap) SmithNormalDiagonalLength() int {
-	if bm.dl >= 0 {
-		return bm.dl
+	if bm.dl != nil {
+		return *bm.dl
 	}
 
 	if bm.sn == nil {
@@ -194,7 +194,7 @@ func (bm *BoundaryMap) SmithNormalDiagonalLength() int {
 	col := 0
 	for ; col < n; col++ {
 		empty := true
-		for _, el := range mat.Col(nil, col, bm.v) {
+		for _, el := range mat.Col(nil, col, bm.sn) {
 			if el != 0 {
 				empty = false
 				break
@@ -206,29 +206,31 @@ func (bm *BoundaryMap) SmithNormalDiagonalLength() int {
 		}
 	}
 
-	bm.dl = col
+	bm.dl = &col
 
 	return col
 }
 
 func (bm *BoundaryMap) Zp() int {
-	if bm.zp >= 0 {
-		return bm.zp
+	if bm.zp != nil {
+		return *bm.zp
 	}
 
 	_, n := bm.SmithNormal().Dims()
 
-	bm.zp = n - bm.SmithNormalDiagonalLength() - 1
+	z := n - bm.SmithNormalDiagonalLength()
+	bm.zp = &z
 
-	return bm.zp
+	return z
 }
 
 func (bm *BoundaryMap) BpLow() int {
-	if bm.bpl >= 0 {
-		return bm.zp
+	if bm.bpl != nil {
+		return *bm.zp
 	}
 
-	bm.bpl = bm.SmithNormalDiagonalLength()
+	bpl := bm.SmithNormalDiagonalLength()
+	bm.bpl = &bpl
 
-	return bm.zp
+	return *bm.bpl
 }
