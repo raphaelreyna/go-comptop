@@ -147,7 +147,7 @@ func (c *Complex) PrincipleSimplices() *SimplicialSet {
 	return &SimplicialSet{set: p}
 }
 
-func (c *Complex) BettiNumbers() []int {
+func (c *Complex) ReducedBettiNumbers() []int {
 	var (
 		z     int
 		betti = []int{}
@@ -163,6 +163,12 @@ func (c *Complex) BettiNumbers() []int {
 	}
 
 	return append(betti, z)
+}
+
+func (c *Complex) BettiNumbers() []int {
+	rb := c.ReducedBettiNumbers()
+	rb[0]++
+	return rb
 }
 
 func (c *Complex) resetCache() {

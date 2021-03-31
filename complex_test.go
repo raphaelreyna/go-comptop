@@ -24,12 +24,30 @@ func TestComplex_PrincipleSimplices(t *testing.T) {
 }
 
 func TestComplex_BettiNumbers(t *testing.T) {
+	// The torus = S^1 x S^1 has betti numbers 1, 2, 1.
 	c := &Complex{}
 	c.NewSimplices([]Base{
-		{0, 1}, {0, 2}, {1, 3}, {2, 3}, {0, 1, 2},
+		{0, 1, 4},
+		{1, 4, 5},
+		{1, 2, 5},
+		{2, 5, 6},
+		{0, 2, 6},
+		{0, 4, 6},
+		{4, 5, 7},
+		{5, 7, 8},
+		{5, 6, 8},
+		{6, 8, 9},
+		{4, 6, 9},
+		{4, 7, 9},
+		{0, 7, 8},
+		{0, 1, 8},
+		{1, 8, 9},
+		{1, 2, 9},
+		{2, 7, 9},
+		{0, 2, 7},
 	}...)
 
-	expectedBN := []int{0, 1, 0}
+	expectedBN := []int{1, 2, 1}
 
 	bn := c.BettiNumbers()
 
