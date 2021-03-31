@@ -5,7 +5,7 @@
 A computational topology package for gophers.
 
 ## Features
-Simplices, simplicial complexes, simplicial chains, chain groups, simplicial sets, methods for computing boundaries, methods for computing Euler characteristics, Euler integration, and more (with even more to come)!
+Simplices, simplicial complexes, simplicial chains, chain groups, simplicial sets, methods for computing boundaries, methods for computing Euler characteristics, Euler integration, Betti numbers, and more (with even more to come)!
 
 ## Contributing
 Contributions are welcome!
