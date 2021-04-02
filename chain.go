@@ -133,6 +133,63 @@ func (c *Chain) Add(a *Chain) *Chain {
 	return chain
 }
 
+func (c *Chain) Intersection(a *Chain) *Chain {
+	if a == nil {
+		return c
+	}
+
+	if c == nil {
+		return a
+	}
+
+	if a.dim != c.dim {
+		return nil
+	}
+
+	if c.chaingroup != a.chaingroup {
+		return nil
+	}
+
+	// Count all of the simplices in the chain both chains
+	simplexCount := map[*Simplex]uint{}
+	for _, smplx := range a.simplices {
+		simplexCount[smplx]++
+	}
+	for _, smplx := range c.simplices {
+		simplexCount[smplx]++
+	}
+
+	chain := &Chain{
+		chain: chain{
+			simplices: []*Simplex{},
+		},
+		complex:    c.complex,
+		chaingroup: c.chaingroup,
+		dim:        c.dim,
+		idxs:       map[Index]*Simplex{},
+		base:       map[Index]struct{}{},
+	}
+
+	// only keep the simplices that show up twice
+	for smplx, count := range simplexCount {
+		if count != 2 {
+			continue
+		}
+
+		chain.simplices = append(chain.simplices, smplx)
+		chain.idxs[smplx.index] = smplx
+		for _, v := range smplx.base {
+			chain.base[v] = struct{}{}
+		}
+	}
+
+	if len(chain.simplices) == 0 {
+		return c.chaingroup.zero
+	}
+
+	return chain
+}
+
 // AddSimplex is a convenience method for adding the Chain containing only the Simplex s to the Chain c.
 func (c *Chain) AddSimplex(s *Simplex) *Chain {
 	return c.Add(c.chaingroup.Singleton(s))
@@ -195,7 +252,7 @@ func (c *Chain) Boundary() *Chain {
 
 	complex := c.complex
 	group := c.chaingroup
-	lowerGroup := complex.GetChainGroup(group.dim - 1)
+	lowerGroup := complex.ChainGroup(group.dim - 1)
 
 	bm := group.BoundaryMap().BoundaryMatrix()
 	v := c.Vector().(mat.Matrix)
@@ -215,4 +272,28 @@ func (c *Chain) Boundary() *Chain {
 	boundary.isCycle = true
 
 	return boundary
+}
+
+// Equals returns true is c is equal to a.
+func (c *Chain) Equals(a *Chain) bool {
+	if c.complex != a.complex || c.dim != a.dim {
+		return false
+	}
+
+	if len(c.simplices) != len(a.simplices) {
+		return false
+	}
+
+	c.sort()
+	a.sort()
+
+	for idx := range c.simplices {
+		cs := c.simplices[idx]
+		as := a.simplices[idx]
+		if !cs.Equals(as) {
+			return false
+		}
+	}
+
+	return true
 }

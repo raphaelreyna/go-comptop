@@ -82,7 +82,7 @@ func (c *Complex) GetdSimplices(d Dim) []*Simplex {
 // ChainGroup returns the free abelian group of d-chains in the Complex.
 //
 // More info: https://en.wikipedia.org/wiki/Free_abelian_group
-func (c *Complex) GetChainGroup(d Dim) *ChainGroup {
+func (c *Complex) ChainGroup(d Dim) *ChainGroup {
 	return c.chaingroup(d)
 }
 
@@ -154,11 +154,11 @@ func (c *Complex) ReducedBettiNumbers() []int {
 	)
 
 	for dim := Dim(0); dim <= c.dim; dim++ {
-		g := c.GetChainGroup(dim)
+		g := c.ChainGroup(dim)
 		if z != 0 {
 			betti = append(betti, z-g.BoundaryMap().SmithNormalDiagonalLength())
 		}
-		bm := c.GetChainGroup(dim).BoundaryMap()
+		bm := c.ChainGroup(dim).BoundaryMap()
 		z = bm.Zp()
 	}
 

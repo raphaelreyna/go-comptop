@@ -25,6 +25,10 @@ type ChainGroup struct {
 	head Index
 
 	bm *BoundaryMap
+
+	cg *CycleGroup
+	bg *BoundaryGroup
+	hg *HomologyGroup
 }
 
 func (c *Complex) newChainGroup(dim Dim) *ChainGroup {

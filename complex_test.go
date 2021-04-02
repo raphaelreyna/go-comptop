@@ -1,6 +1,10 @@
 package comptop
 
-import "testing"
+import (
+	"testing"
+
+	"gonum.org/v1/gonum/mat"
+)
 
 func TestComplex_PrincipleSimplices(t *testing.T) {
 	cmplx := &Complex{}
@@ -59,5 +63,63 @@ func TestComplex_BettiNumbers(t *testing.T) {
 		if bn[idx] != ebn {
 			t.Fatalf("Betti number %d is wrong; expected %d received %d", idx, ebn, bn[idx])
 		}
+	}
+}
+
+func TestComplex_HomologyGroup(t *testing.T) {
+	c := &Complex{}
+	c.NewSimplices([]Base{
+		{0, 1, 3},
+		{1, 3, 4},
+		{1, 2, 4},
+		{2, 4, 5},
+		{0, 2, 5},
+		{0, 3, 5},
+
+		{3, 4, 6},
+		{4, 6, 7},
+		{4, 5, 7},
+		{5, 7, 8},
+		{3, 5, 8},
+		{3, 6, 8},
+
+		{0, 6, 7},
+		{0, 1, 7},
+		{1, 7, 8},
+		{1, 2, 8},
+		{2, 6, 8},
+		{0, 2, 6},
+	}...)
+
+	g1 := c.ChainGroup(1)
+	bm1 := g1.BoundaryMap()
+	bm1.reduce()
+	bm1.u.Inverse(bm1.u)
+
+	g2 := c.ChainGroup(2)
+	bm2 := g2.BoundaryMap()
+	bm2.reduce()
+	bm2.u.Inverse(bm2.u)
+
+	z1Basis := [][]float64{}
+	for i := bm1.SmithNormalDiagonalLength(); i < g1.Rank(); i++ {
+		z1Basis = append(z1Basis, mat.Col(nil, i, bm1.v))
+	}
+
+	b1Basis := [][]float64{}
+	for i := 0; i < bm1.SmithNormalDiagonalLength(); i++ {
+		col := mat.Col(nil, i, bm2.u)
+		for idx := range col {
+			col[idx] = float64(int(col[idx]) % 2)
+			col[idx] *= col[idx]
+		}
+		b1Basis = append(b1Basis, col)
+	}
+
+	hgBasis := c.ChainGroup(1).HomologyGroup().MinimalBasis()
+	t.Fatal(hgBasis)
+
+	if len(hgBasis) != 2 {
+		t.Fatalf("Expected H_1(T^2) to have 2 generators, computed %d\n", len(hgBasis))
 	}
 }

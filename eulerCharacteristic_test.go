@@ -18,7 +18,7 @@ func TestEulerChar_Chain(t *testing.T) {
 		Base{2, 3},
 	)
 
-	cg1 := c.GetChainGroup(1)
+	cg1 := c.ChainGroup(1)
 	chain := cg1.NewChainFromSimplices(edges.Slice()...)
 
 	if x := chain.EulerChar(); x != 2 {

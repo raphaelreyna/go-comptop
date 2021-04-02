@@ -175,7 +175,7 @@ func (s *Simplex) Boundary() *Chain {
 
 	chain := &Chain{chain: chain{simplices: []*Simplex{}}, dim: dim - 1}
 	chain.complex = s.complex
-	chain.chaingroup = s.complex.GetChainGroup(chain.dim)
+	chain.chaingroup = s.complex.ChainGroup(chain.dim)
 	chain.simplices = s.Faces(dim - 1).Slice()
 
 	return chain

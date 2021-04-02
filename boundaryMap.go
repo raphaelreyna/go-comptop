@@ -9,6 +9,7 @@ type BoundaryMap struct {
 
 	sn *mat.Dense
 	u  *mat.Dense
+	ui *mat.Dense
 	v  *mat.Dense
 
 	dl  *int
@@ -18,6 +19,56 @@ type BoundaryMap struct {
 
 func (bm *BoundaryMap) BoundaryMatrix() mat.Matrix {
 	return bm.mat
+}
+
+func (bm *BoundaryMap) SmithNormal() mat.Matrix {
+	if bm.sn != nil {
+		return bm.sn
+	}
+
+	bm.reduce()
+
+	return bm.sn
+}
+
+func (bm *BoundaryMap) U() mat.Matrix {
+	if bm.u == nil {
+		bm.reduce()
+	}
+
+	return bm.u
+}
+
+func (bm *BoundaryMap) UInverse() mat.Matrix {
+	if bm.ui != nil {
+		return bm.ui
+	}
+
+	u := bm.U()
+	m, n := u.Dims()
+	bm.ui = mat.NewDense(m, n, nil)
+	bm.ui.Inverse(u)
+
+	// Map into into M_{n,m}(Z_2)
+	for row := 0; row < m; row++ {
+		for col := 0; col < n; col++ {
+			x := int(bm.ui.At(row, col))
+			x = x % 2
+			x *= x
+
+			bm.ui.Set(row, col, float64(x))
+		}
+	}
+
+	return bm.ui
+}
+
+func (bm *BoundaryMap) V() mat.Matrix {
+	if bm.v == nil {
+		bm.reduce()
+	}
+
+	return bm.v
 }
 
 func (bm *BoundaryMap) reduce() {
@@ -169,16 +220,6 @@ func _addCols(k, l int, a, v *mat.Dense) {
 	v.Set(k, l, 1.0)
 	v.Set(k, k, 1.0)
 	v.Set(l, l, 1.0)
-}
-
-func (bm *BoundaryMap) SmithNormal() mat.Matrix {
-	if bm.sn != nil {
-		return bm.sn
-	}
-
-	bm.reduce()
-
-	return bm.sn
 }
 
 func (bm *BoundaryMap) SmithNormalDiagonalLength() int {
