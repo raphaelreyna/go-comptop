@@ -5,12 +5,56 @@
 A computational topology package for gophers.
 
 ## Features
-Simplices, simplicial complexes, simplicial chains, chain groups, simplicial sets, methods for computing boundaries, methods for computing Euler characteristics, Euler integration, Betti numbers, and more (with even more to come)!
+Simplices; simplicial complexes; simplicial chains; chain, cycle, boundary and homology groups; sets of simplices; methods for computing boundaries, Euler characteristics, Euler integrals, and Betti numbers, and more (with even more to come)!
 
 ## Contributing
 Contributions are welcome!
 
 ## Examples:
+### Computing paths around holes in a network (computing a basis for the first homology group):
+#### Scenario:
+Suppose we have a network with the topology of a [torus](https://en.wikipedia.org/wiki/Torus).
+
+#### Problem:
+We want to find a path around both holes in the network.
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Torus_cycles.svg/220px-Torus_cycles.svg.png" height="256px">
+
+#### Solution:
+We can compute a basis for the first homology group of the network.
+```go
+package main
+
+import (
+        "fmt"
+        "github.com/raphaelreyna/go-comptop"
+        "github.com/raphaelreyna/go-comptop/spaces"
+)
+
+func main() {
+        c := &comptop.Complex{}
+        c.NewSimplices(spaces.Torus...)
+
+        fmt.Println(c.ChainGroup(1).HomologyGroup().MinimalBasis())
+}
+```
+
+We get the following output which correctly gives two cycles (chains), one around each hole:
+```
+[
+	Chain{
+		Simplex{"dim": 1, "index": 0, "base": [0 1]},
+		Simplex{"dim": 1, "index": 5, "base": [1 2]},
+		Simplex{"dim": 1, "index": 9, "base": [0 2]},
+	},
+	Chain{
+		Simplex{"dim": 1, "index": 1, "base": [0 3]},
+		Simplex{"dim": 1, "index": 12, "base": [3 6]},
+		Simplex{"dim": 1, "index": 21, "base": [0 6]},
+	},
+]
+```
+
 ### Counting requests to load-balanced services with poor observability:
 #### Scenario:
 Suppose we have a backend with the network topology shown below.
