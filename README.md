@@ -13,7 +13,7 @@ Contributions are welcome!
 ## Examples:
 ### Computing paths around holes in a network (computing a basis for the first homology group):
 #### Scenario:
-Suppose we have a network with the topology of a [torus](https://en.wikipedia.org/wiki/Torus).
+Suppose we have a [torus interconnect](https://en.wikipedia.org/wiki/Torus_interconnect) network topology.
 
 #### Problem:
 We want to find a path around both holes in the network.
