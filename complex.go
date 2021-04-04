@@ -147,6 +147,8 @@ func (c *Complex) PrincipleSimplices() *SimplicialSet {
 	return &SimplicialSet{set: p}
 }
 
+// ReducedBettiNumbers gives the sequence of reduced Betti numbers B_0 to B_p where p is the dimension of the complex.
+// The Betti number B_d can be thought of as the number of d-dimensional holes in the Complex.
 func (c *Complex) ReducedBettiNumbers() []int {
 	var (
 		z     int
@@ -165,6 +167,9 @@ func (c *Complex) ReducedBettiNumbers() []int {
 	return append(betti, z)
 }
 
+// BettiNumbers gives the sequence of Betti numbers B_0 to B_p where p is the dimension of the complex.
+// The Betti number B_d can be thought of as the number of d-dimensional holes in the Complex;
+// except for B_0, which is the number of connected components.
 func (c *Complex) BettiNumbers() []int {
 	rb := c.ReducedBettiNumbers()
 	rb[0]++

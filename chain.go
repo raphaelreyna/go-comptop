@@ -133,6 +133,7 @@ func (c *Chain) Add(a *Chain) *Chain {
 	return chain
 }
 
+// Intersection returns the intersection of chains c and a.
 func (c *Chain) Intersection(a *Chain) *Chain {
 	if a == nil {
 		return c

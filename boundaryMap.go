@@ -4,6 +4,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// BoundaryMap is the bonudary map between chain groups of dimensions p and p-1.
 type BoundaryMap struct {
 	mat mat.Matrix
 
@@ -17,10 +18,12 @@ type BoundaryMap struct {
 	bpl *int
 }
 
+// BoundaryMatrix returns the matrix representation of the boundary map.
 func (bm *BoundaryMap) BoundaryMatrix() mat.Matrix {
 	return bm.mat
 }
 
+// SmithNormal returns the Smith normal form of the boundary matrix.
 func (bm *BoundaryMap) SmithNormal() mat.Matrix {
 	if bm.sn != nil {
 		return bm.sn
@@ -31,6 +34,7 @@ func (bm *BoundaryMap) SmithNormal() mat.Matrix {
 	return bm.sn
 }
 
+// U returns the the left-side matrix in the Smith normal factorization of the boundaty matrix.
 func (bm *BoundaryMap) U() mat.Matrix {
 	if bm.u == nil {
 		bm.reduce()
@@ -39,6 +43,7 @@ func (bm *BoundaryMap) U() mat.Matrix {
 	return bm.u
 }
 
+// UInverse returns the inverse of the left-side matrix in the Smith normal factorization of the boundaty matrix.
 func (bm *BoundaryMap) UInverse() mat.Matrix {
 	if bm.ui != nil {
 		return bm.ui
@@ -63,6 +68,7 @@ func (bm *BoundaryMap) UInverse() mat.Matrix {
 	return bm.ui
 }
 
+// V returns the the right-side matrix in the Smith normal factorization of the boundaty matrix.
 func (bm *BoundaryMap) V() mat.Matrix {
 	if bm.v == nil {
 		bm.reduce()
@@ -71,13 +77,77 @@ func (bm *BoundaryMap) V() mat.Matrix {
 	return bm.v
 }
 
+// SmithNormalDiagonalLength returns the number of non-zero elements on the diagonal of the Smith normal form of the boundary matrix.
+func (bm *BoundaryMap) SmithNormalDiagonalLength() int {
+	if bm.dl != nil {
+		return *bm.dl
+	}
+
+	if bm.sn == nil {
+		bm.reduce()
+	}
+
+	_, n := bm.v.Dims()
+	col := 0
+	for ; col < n; col++ {
+		empty := true
+		for _, el := range mat.Col(nil, col, bm.sn) {
+			if el != 0 {
+				empty = false
+				break
+			}
+		}
+
+		if empty {
+			break
+		}
+	}
+
+	bm.dl = &col
+
+	return col
+}
+
+// Zp returns the number of 0-columns in the Smith normal form of the boundary matrix.
+// The value returned by Zp coincides with the rank of the kernel of the boundary matrix,
+// which is the same as the rank of the cycle group Z_p < C_p.
+func (bm *BoundaryMap) Zp() int {
+	if bm.zp != nil {
+		return *bm.zp
+	}
+
+	_, n := bm.SmithNormal().Dims()
+
+	z := n - bm.SmithNormalDiagonalLength()
+	bm.zp = &z
+
+	return z
+}
+
+// BpLow returns the number of non-zero rows in the Smith normal form of the boundary matrix.
+// The value returned by BpLow coincides with the rank of the image of the boundary matrix,
+// which is the same as the rank of the boundary group B_{p-1} < Z_{p-1} < C_{p-1}.
+func (bm *BoundaryMap) BpLow() int {
+	if bm.bpl != nil {
+		return *bm.zp
+	}
+
+	bpl := bm.SmithNormalDiagonalLength()
+	bm.bpl = &bpl
+
+	return *bm.bpl
+}
+
+// reduce computes the Smith normal form (u and v matrices are also computed along the way).
 func (bm *BoundaryMap) reduce() {
 	if bm.sn != nil || bm.mat == nil {
 		return
 	}
 
+	// Create a copy of the boundary matrix that we can mutate into its Smith normal form
 	bm.sn = mat.DenseCopyOf(bm.mat)
 
+	// Create the U and V factors: SmithNormal = U * BoundaryMatrix * V
 	m, n := bm.mat.Dims()
 	bm.u = mat.NewDense(m, m, nil)
 	for i := 0; i < m; i++ {
@@ -89,8 +159,10 @@ func (bm *BoundaryMap) reduce() {
 		bm.v.Set(i, i, 1.0)
 	}
 
+	// Carry out the Smith normal reduction
 	_reduce(0, bm.sn, bm.u, bm.v)
 
+	// Map matrices U and V into M(Z_2)
 	for row := 0; row < m; row++ {
 		for col := 0; col < m; col++ {
 			bm.u.Set(row, col,
@@ -108,6 +180,8 @@ func (bm *BoundaryMap) reduce() {
 	}
 }
 
+// _reduce is the actual reduction algorithm for computhing the Smith normal form of the boundary matrix.
+// Taken from 'Computational Topology: An Introduction' by Edelsbrunner & Harer, pg 88.
 func _reduce(x int, n, u, v *mat.Dense) {
 	uDim, vDim := n.Dims()
 
@@ -166,6 +240,9 @@ outer:
 	_reduce(x+1, n, u, v)
 }
 
+// Below are the matrix operations layed out in
+// 'Computational Topology: An Introduction' by Edelsbrunner & Harer, pgs 86-87.
+
 func _swapRows(i, j int, a, u *mat.Dense) {
 	if i == j {
 		return
@@ -220,58 +297,4 @@ func _addCols(k, l int, a, v *mat.Dense) {
 	v.Set(k, l, 1.0)
 	v.Set(k, k, 1.0)
 	v.Set(l, l, 1.0)
-}
-
-func (bm *BoundaryMap) SmithNormalDiagonalLength() int {
-	if bm.dl != nil {
-		return *bm.dl
-	}
-
-	if bm.sn == nil {
-		bm.reduce()
-	}
-
-	_, n := bm.v.Dims()
-	col := 0
-	for ; col < n; col++ {
-		empty := true
-		for _, el := range mat.Col(nil, col, bm.sn) {
-			if el != 0 {
-				empty = false
-				break
-			}
-		}
-
-		if empty {
-			break
-		}
-	}
-
-	bm.dl = &col
-
-	return col
-}
-
-func (bm *BoundaryMap) Zp() int {
-	if bm.zp != nil {
-		return *bm.zp
-	}
-
-	_, n := bm.SmithNormal().Dims()
-
-	z := n - bm.SmithNormalDiagonalLength()
-	bm.zp = &z
-
-	return z
-}
-
-func (bm *BoundaryMap) BpLow() int {
-	if bm.bpl != nil {
-		return *bm.zp
-	}
-
-	bpl := bm.SmithNormalDiagonalLength()
-	bm.bpl = &bpl
-
-	return *bm.bpl
 }
