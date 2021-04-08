@@ -20,7 +20,7 @@ func (s *simplex) sort() {
 		return
 	}
 
-	sort.Sort(s)
+	sort.Sort(s.base)
 	s.sorted = true
 }
 
@@ -152,7 +152,7 @@ func (s *Simplex) Intersection(g *Simplex) *Simplex {
 
 	intersection := make([]Index, 0)
 
-	n := g.Len()
+	n := g.base.Len()
 
 	for _, el := range s.base {
 		idx := sort.Search(n, func(j int) bool {

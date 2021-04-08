@@ -117,7 +117,6 @@ func TestComplex_HomologyGroup(t *testing.T) {
 	}
 
 	hgBasis := c.ChainGroup(1).HomologyGroup().MinimalBasis()
-	t.Fatal(hgBasis)
 
 	if len(hgBasis) != 2 {
 		t.Fatalf("Expected H_1(T^2) to have 2 generators, computed %d\n", len(hgBasis))

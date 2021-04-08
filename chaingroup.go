@@ -2,6 +2,7 @@ package comptop
 
 import (
 	"fmt"
+	"sort"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -16,9 +17,11 @@ import (
 type ChainGroup struct {
 	complex *Complex
 
-	simplices map[Index]*Simplex
-	basespace map[Index]struct{}
-	dim       Dim
+	idxs       Base
+	idxsSorted bool
+	simplices  map[Index]*Simplex
+	basespace  map[Index]struct{}
+	dim        Dim
 
 	zero *Chain
 
@@ -34,6 +37,7 @@ type ChainGroup struct {
 func (c *Complex) newChainGroup(dim Dim) *ChainGroup {
 	cg := &ChainGroup{
 		complex:   c,
+		idxs:      Base{},
 		simplices: map[Index]*Simplex{},
 		basespace: map[Index]struct{}{},
 		zero:      &Chain{complex: c, dim: dim},
@@ -50,18 +54,26 @@ func (cg *ChainGroup) addSimplex(s *Simplex) {
 		return
 	}
 
-	s.index = cg.head
+	if s.Dim() != 0 {
+		s.index = cg.head
+		if _, exists := cg.simplices[s.index]; exists {
+			return
+		}
+
+		cg.head++
+	}
+
 	if _, exists := cg.simplices[s.index]; exists {
 		return
 	}
-
-	cg.head++
 
 	cg.simplices[s.index] = s
 	for _, v := range s.base {
 		cg.basespace[v] = struct{}{}
 	}
+	cg.idxs = append(cg.idxs, s.index)
 
+	cg.idxsSorted = false
 	cg.bm = nil
 
 	higherGroup := cg.complex.chainGroups[cg.dim+1]
@@ -320,12 +332,15 @@ func (cg *ChainGroup) updateBoundaryMap() {
 		return
 	}
 
+	cg.sortIdxs()
+
 	complex := cg.complex
 	lowerGroup := complex.chainGroups[cg.dim-1]
 	if lowerGroup == nil {
 		complex.chainGroups[cg.dim-1] = cg.complex.newChainGroup(cg.dim - 1)
 		lowerGroup = complex.chainGroups[cg.dim-1]
 	}
+	lowerGroup.sortIdxs()
 
 	n := cg.Rank()         // cols
 	m := lowerGroup.Rank() // rows
@@ -338,8 +353,10 @@ func (cg *ChainGroup) updateBoundaryMap() {
 
 	for row := 0; row < m; row++ {
 		for col := 0; col < n; col++ {
-			lowDimSimplex := lowerGroup.simplices[Index(row)]
-			highDimSimplex := cg.simplices[Index(col)]
+			rowIdx := lowerGroup.idxs[row]
+			colIdx := cg.idxs[col]
+			lowDimSimplex := lowerGroup.simplices[rowIdx]
+			highDimSimplex := cg.simplices[colIdx]
 
 			a := 0.0
 			if highDimSimplex.HasFace(lowDimSimplex) {
@@ -353,6 +370,15 @@ func (cg *ChainGroup) updateBoundaryMap() {
 	cg.bm = &BoundaryMap{
 		mat: bm,
 	}
+}
+
+func (cg *ChainGroup) sortIdxs() {
+	if cg.idxsSorted {
+		return
+	}
+
+	sort.Sort(cg.idxs)
+	cg.idxsSorted = true
 }
 
 type ChainGroups map[Dim]*ChainGroup

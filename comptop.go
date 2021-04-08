@@ -16,6 +16,18 @@ type Index uint
 // Base is a collection of indices for 0-dimensional simplices.
 type Base []Index
 
+func (b Base) Len() int {
+	return len(b)
+}
+
+func (b Base) Less(i, j int) bool {
+	return b[i] < b[j]
+}
+
+func (b Base) Swap(i, j int) {
+	b[i], b[j] = b[j], b[i]
+}
+
 // Vector is a vector representation of the elements of a ChainGroup of rank p where p = length of the vector.
 // All elements/entries are expected to be 0 or 1.
 // A 1 in the i_th position indicates that the p-dimensional Simplex with index i is part of the chain.

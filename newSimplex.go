@@ -39,6 +39,9 @@ func (c *Complex) NewSimplex(base ...Index) *Simplex {
 			simplex: *ss,
 			complex: c,
 		}
+		if p == 0 {
+			smplx.index = ss.base[0]
+		}
 
 		group := c.chainGroups[p]
 		if group == nil {
@@ -111,6 +114,9 @@ func (c *Complex) NewSimplices(bases ...Base) *SimplicialSet {
 			smplx := &Simplex{
 				simplex: *ss,
 				complex: c,
+			}
+			if p == 0 {
+				smplx.index = ss.base[0]
 			}
 
 			group := c.chainGroups[p]
@@ -187,6 +193,9 @@ func (c *Complex) NewSimplexWithData(dp DataProvider, base ...Index) *Simplex {
 			simplex: *ss,
 			complex: c,
 		}
+		if p == 0 {
+			smplx.index = ss.base[0]
+		}
 
 		group := c.chainGroups[p]
 		if group == nil {
@@ -256,6 +265,9 @@ func (c *Complex) NewSimplicesWithData(dp DataProvider, bases ...Base) *Simplici
 			smplx := &Simplex{
 				simplex: *ss,
 				complex: c,
+			}
+			if p == 0 {
+				smplx.index = ss.base[0]
 			}
 
 			group := c.chainGroups[p]
